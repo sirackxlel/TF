@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Demo de pagina web publica con login para pruebas de dominio, DNS y HTTPS."
+    />
+    <title>CowMarket | Demo login</title>
+    <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="page-shell">
+      <section class="intro" aria-label="Informacion de publicacion web">
+        <a class="brand" href="/" aria-label="CowMarket inicio">
+          <span class="brand-mark">C</span>
+          <span>CowMarket</span>
+        </a>
+
+        <div class="intro-copy">
+          <h1>Demo publica con login listo para exponer.</h1>
+          <p>
+            Una pagina estatica para probar tu dominio, DNS, HTTPS y despliegue
+            sin gastar un peso.
+          </p>
+        </div>
+
+        <ul class="deploy-list" aria-label="Stack sugerido">
+          <li>
+            <span>Dominio</span>
+            <strong>FreeDomain o subdominio propio</strong>
+          </li>
+          <li>
+            <span>DNS</span>
+            <strong>Cloudflare</strong>
+          </li>
+          <li>
+            <span>Frontend</span>
+            <strong>Cloudflare Pages / GitHub Pages</strong>
+          </li>
+          <li>
+            <span>HTTPS</span>
+            <strong>Automatico al publicar</strong>
+          </li>
+        </ul>
+      </section>
+
+      <section class="login-card" aria-label="Acceso a la demo">
+        <div id="loginView">
+          <div class="card-heading">
+            <p>Acceso de prueba</p>
+            <h2>Entrar al panel</h2>
+          </div>
+
+          <form id="loginForm" novalidate>
+            <label for="email">Email</label>
+            <input
+              id="email"
+              name="email"
+              type="email"
+              autocomplete="username"
+              placeholder="demo@cowmarket.test"
+              required
+            />
+
+            <label for="password">Clave</label>
+            <div class="password-row">
+              <input
+                id="password"
+                name="password"
+                type="password"
+                autocomplete="current-password"
+                placeholder="demo1234"
+                required
+              />
+              <button
+                class="icon-button"
+                id="togglePassword"
+                type="button"
+                aria-label="Mostrar clave"
+                title="Mostrar clave"
+              >
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z" />
+                  <circle cx="12" cy="12" r="3" />
+                </svg>
+              </button>
+            </div>
+
+            <p class="form-error" id="formError" role="alert"></p>
+
+            <button class="primary-button" type="submit">Iniciar sesion</button>
+          </form>
+
+          <div class="test-access" aria-label="Credenciales de prueba">
+            <span>Usuario: demo@cowmarket.test</span>
+            <span>Clave: demo1234</span>
+          </div>
+        </div>
+
+        <div class="dashboard is-hidden" id="dashboardView">
+          <div class="success-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+              <path d="M20 6 9 17l-5-5" />
+            </svg>
+          </div>
+          <div class="card-heading">
+            <p>Sesion activa</p>
+            <h2>Tu pagina ya responde</h2>
+          </div>
+          <p class="dashboard-copy">
+            Si ves esta pantalla, el login local funciona. El siguiente paso es
+            subir estos archivos a tu hosting y apuntar el dominio desde DNS.
+          </p>
+          <div class="status-grid">
+            <div>
+              <span>Frontend</span>
+              <strong>OK</strong>
+            </div>
+            <div>
+              <span>Login demo</span>
+              <strong>OK</strong>
+            </div>
+            <div>
+              <span>HTTPS</span>
+              <strong>Hosting</strong>
+            </div>
+          </div>
+          <button class="secondary-button" id="logoutButton" type="button">
+            Cerrar sesion
+          </button>
+        </div>
+      </section>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>
