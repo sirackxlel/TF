@@ -1,5 +1,3 @@
-const VALID_EMAIL = "demo@cowmarket.test";
-const VALID_PASSWORD = "demo1234";
 const SESSION_KEY = "cowmarket-demo-session";
 
 const loginView = document.querySelector("#loginView");
@@ -10,17 +8,39 @@ const passwordInput = document.querySelector("#password");
 const formError = document.querySelector("#formError");
 const togglePassword = document.querySelector("#togglePassword");
 const logoutButton = document.querySelector("#logoutButton");
+const backendStatus = document.querySelector("#backendStatus");
+const loginCount = document.querySelector("#loginCount");
 
 function setLoggedIn(isLoggedIn) {
   loginView.classList.toggle("is-hidden", isLoggedIn);
   dashboardView.classList.toggle("is-hidden", !isLoggedIn);
+
+  if (isLoggedIn) {
+    loadStats();
+  }
 }
 
 function showError(message) {
   formError.textContent = message;
 }
 
-loginForm.addEventListener("submit", (event) => {
+async function loadStats() {
+  backendStatus.textContent = "Conectando";
+  loginCount.textContent = "...";
+
+  try {
+    const response = await fetch("/api/stats");
+    const data = await response.json();
+
+    backendStatus.textContent = data.databaseConnected ? "OK + DB" : "OK";
+    loginCount.textContent = data.databaseConnected ? String(data.totalLogins) : "Sin D1";
+  } catch (error) {
+    backendStatus.textContent = "Sin API";
+    loginCount.textContent = "-";
+  }
+}
+
+loginForm.addEventListener("submit", async (event) => {
   event.preventDefault();
 
   const email = emailInput.value.trim().toLowerCase();
@@ -31,14 +51,29 @@ loginForm.addEventListener("submit", (event) => {
     return;
   }
 
-  if (email !== VALID_EMAIL || password !== VALID_PASSWORD) {
-    showError("Credenciales incorrectas. Usa los datos de prueba.");
-    return;
-  }
-
-  localStorage.setItem(SESSION_KEY, "active");
   showError("");
-  setLoggedIn(true);
+
+  try {
+    const response = await fetch("/api/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email, password }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok || !data.ok) {
+      showError(data.message || "Credenciales incorrectas. Usa los datos de prueba.");
+      return;
+    }
+
+    localStorage.setItem(SESSION_KEY, JSON.stringify({ email, loggedAt: data.loggedAt }));
+    setLoggedIn(true);
+  } catch (error) {
+    showError("No se pudo conectar con el backend. Publicalo en Cloudflare Pages o usa Wrangler local.");
+  }
 });
 
 togglePassword.addEventListener("click", () => {
@@ -55,4 +90,4 @@ logoutButton.addEventListener("click", () => {
   emailInput.focus();
 });
 
-setLoggedIn(localStorage.getItem(SESSION_KEY) === "active");
+setLoggedIn(Boolean(localStorage.getItem(SESSION_KEY)));

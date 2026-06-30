@@ -117,8 +117,8 @@
             <h2>Tu pagina ya responde</h2>
           </div>
           <p class="dashboard-copy">
-            Si ves esta pantalla, el login local funciona. El siguiente paso es
-            subir estos archivos a tu hosting y apuntar el dominio desde DNS.
+            Si ves esta pantalla, el frontend llamo al backend. Cuando conectes
+            D1, cada login quedara guardado en la base de datos.
           </p>
           <div class="status-grid">
             <div>
@@ -126,12 +126,12 @@
               <strong>OK</strong>
             </div>
             <div>
-              <span>Login demo</span>
-              <strong>OK</strong>
+              <span>Backend</span>
+              <strong id="backendStatus">OK</strong>
             </div>
             <div>
-              <span>HTTPS</span>
-              <strong>Hosting</strong>
+              <span>Logins guardados</span>
+              <strong id="loginCount">...</strong>
             </div>
           </div>
           <button class="secondary-button" id="logoutButton" type="button">
