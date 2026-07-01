@@ -1,21 +1,24 @@
-const SESSION_KEY = "cowmarket-demo-session";
+const LAST_USER_KEY = "cowmarket-last-user";
 
-const loginView = document.querySelector("#loginView");
+const formView = document.querySelector("#formView");
 const dashboardView = document.querySelector("#dashboardView");
-const loginForm = document.querySelector("#loginForm");
+const userForm = document.querySelector("#userForm");
 const emailInput = document.querySelector("#email");
-const passwordInput = document.querySelector("#password");
+const fullNameInput = document.querySelector("#fullName");
+const phoneInput = document.querySelector("#phone");
+const countryInput = document.querySelector("#country");
 const formError = document.querySelector("#formError");
-const togglePassword = document.querySelector("#togglePassword");
-const logoutButton = document.querySelector("#logoutButton");
+const newUserButton = document.querySelector("#newUserButton");
 const backendStatus = document.querySelector("#backendStatus");
-const loginCount = document.querySelector("#loginCount");
+const userCount = document.querySelector("#userCount");
+const savedUserTitle = document.querySelector("#savedUserTitle");
+const recentUsers = document.querySelector("#recentUsers");
 
-function setLoggedIn(isLoggedIn) {
-  loginView.classList.toggle("is-hidden", isLoggedIn);
-  dashboardView.classList.toggle("is-hidden", !isLoggedIn);
+function setSavedView(isSaved) {
+  formView.classList.toggle("is-hidden", isSaved);
+  dashboardView.classList.toggle("is-hidden", !isSaved);
 
-  if (isLoggedIn) {
+  if (isSaved) {
     loadStats();
   }
 }
@@ -26,68 +29,100 @@ function showError(message) {
 
 async function loadStats() {
   backendStatus.textContent = "Conectando";
-  loginCount.textContent = "...";
+  userCount.textContent = "...";
+  recentUsers.textContent = "";
 
   try {
-    const response = await fetch("/api/stats");
+    const response = await fetch("/api/users");
     const data = await response.json();
 
-    backendStatus.textContent = data.databaseConnected ? "OK + DB" : "OK";
-    loginCount.textContent = data.databaseConnected ? String(data.totalLogins) : "Sin D1";
+    backendStatus.textContent = data.databaseConnected ? "OK + DB" : "Sin DB";
+    userCount.textContent = data.databaseConnected ? String(data.totalUsers) : "Sin D1";
+
+    if (data.users?.length) {
+      recentUsers.innerHTML = data.users
+        .map(
+          (user) => `
+            <div>
+              <strong>${escapeHtml(user.fullName)}</strong>
+              <span>${escapeHtml(user.email)} · ${escapeHtml(user.country)}</span>
+            </div>
+          `
+        )
+        .join("");
+    }
   } catch (error) {
     backendStatus.textContent = "Sin API";
-    loginCount.textContent = "-";
+    userCount.textContent = "-";
   }
 }
 
-loginForm.addEventListener("submit", async (event) => {
+function escapeHtml(value) {
+  return String(value)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+userForm.addEventListener("submit", async (event) => {
   event.preventDefault();
 
   const email = emailInput.value.trim().toLowerCase();
-  const password = passwordInput.value;
+  const fullName = fullNameInput.value.trim();
+  const phone = phoneInput.value.trim();
+  const country = countryInput.value;
 
-  if (!email || !password) {
-    showError("Completa email y clave para entrar.");
+  if (!email || !fullName || !phone || !country) {
+    showError("Completa email, nombre completo, numero y pais.");
     return;
   }
 
   showError("");
 
   try {
-    const response = await fetch("/api/login", {
+    const response = await fetch("/api/users", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({ email, fullName, phone, country }),
     });
 
     const data = await response.json();
 
     if (!response.ok || !data.ok) {
-      showError(data.message || "Credenciales incorrectas. Usa los datos de prueba.");
+      showError(data.message || "No se pudo guardar el usuario.");
       return;
     }
 
-    localStorage.setItem(SESSION_KEY, JSON.stringify({ email, loggedAt: data.loggedAt }));
-    setLoggedIn(true);
+    localStorage.setItem(LAST_USER_KEY, JSON.stringify(data.user));
+    savedUserTitle.textContent = data.user.fullName;
+    setSavedView(true);
   } catch (error) {
-    showError("No se pudo conectar con el backend. Publicalo en Cloudflare Pages o usa Wrangler local.");
+    showError("No se pudo conectar con el backend. Revisa el deploy de Cloudflare Pages.");
   }
 });
 
-togglePassword.addEventListener("click", () => {
-  const isPassword = passwordInput.type === "password";
-  passwordInput.type = isPassword ? "text" : "password";
-  togglePassword.setAttribute("aria-label", isPassword ? "Ocultar clave" : "Mostrar clave");
-  togglePassword.setAttribute("title", isPassword ? "Ocultar clave" : "Mostrar clave");
-});
-
-logoutButton.addEventListener("click", () => {
-  localStorage.removeItem(SESSION_KEY);
-  passwordInput.value = "";
-  setLoggedIn(false);
+newUserButton.addEventListener("click", () => {
+  localStorage.removeItem(LAST_USER_KEY);
+  userForm.reset();
+  setSavedView(false);
   emailInput.focus();
 });
 
-setLoggedIn(Boolean(localStorage.getItem(SESSION_KEY)));
+const lastUser = localStorage.getItem(LAST_USER_KEY);
+
+if (lastUser) {
+  try {
+    const user = JSON.parse(lastUser);
+    savedUserTitle.textContent = user.fullName || "Registro creado";
+    setSavedView(true);
+  } catch (error) {
+    localStorage.removeItem(LAST_USER_KEY);
+    setSavedView(false);
+  }
+} else {
+  setSavedView(false);
+}

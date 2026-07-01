@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta
       name="description"
-      content="Demo de pagina web publica con login para pruebas de dominio, DNS y HTTPS."
+      content="Demo de pagina web publica con registro de usuarios, backend y base de datos."
     />
-    <title>CowMarket | Demo login</title>
+    <title>CowMarket | Registro demo</title>
     <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -26,10 +26,10 @@
         </a>
 
         <div class="intro-copy">
-          <h1>Demo publica con login listo para exponer.</h1>
+          <h1>Demo publica con usuarios guardados en D1.</h1>
           <p>
-            Una pagina estatica para probar tu dominio, DNS, HTTPS y despliegue
-            sin gastar un peso.
+            Un formulario simple para aprender como se conectan frontend,
+            backend, base de datos, dominio, DNS y HTTPS.
           </p>
         </div>
 
@@ -44,66 +44,77 @@
           </li>
           <li>
             <span>Frontend</span>
-            <strong>Cloudflare Pages / GitHub Pages</strong>
+            <strong>Cloudflare Pages</strong>
           </li>
           <li>
-            <span>HTTPS</span>
-            <strong>Automatico al publicar</strong>
+            <span>Backend</span>
+            <strong>Pages Functions</strong>
+          </li>
+          <li>
+            <span>Base de datos</span>
+            <strong>Cloudflare D1</strong>
           </li>
         </ul>
       </section>
 
-      <section class="login-card" aria-label="Acceso a la demo">
-        <div id="loginView">
+      <section class="login-card" aria-label="Registro de usuarios">
+        <div id="formView">
           <div class="card-heading">
-            <p>Acceso de prueba</p>
-            <h2>Entrar al panel</h2>
+            <p>Registro de prueba</p>
+            <h2>Crear usuario</h2>
           </div>
 
-          <form id="loginForm" novalidate>
+          <form id="userForm" novalidate>
             <label for="email">Email</label>
             <input
               id="email"
               name="email"
               type="email"
-              autocomplete="username"
-              placeholder="demo@cowmarket.test"
+              autocomplete="email"
+              placeholder="persona@email.com"
               required
             />
 
-            <label for="password">Clave</label>
-            <div class="password-row">
-              <input
-                id="password"
-                name="password"
-                type="password"
-                autocomplete="current-password"
-                placeholder="demo1234"
-                required
-              />
-              <button
-                class="icon-button"
-                id="togglePassword"
-                type="button"
-                aria-label="Mostrar clave"
-                title="Mostrar clave"
-              >
-                <svg viewBox="0 0 24 24" aria-hidden="true">
-                  <path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z" />
-                  <circle cx="12" cy="12" r="3" />
-                </svg>
-              </button>
-            </div>
+            <label for="fullName">Nombre completo</label>
+            <input
+              id="fullName"
+              name="fullName"
+              type="text"
+              autocomplete="name"
+              placeholder="Ignacio Guerrero"
+              required
+            />
+
+            <label for="phone">Numero</label>
+            <input
+              id="phone"
+              name="phone"
+              type="tel"
+              autocomplete="tel"
+              placeholder="+54 11 6722 7112"
+              required
+            />
+
+            <label for="country">Pais</label>
+            <select id="country" name="country" autocomplete="country-name" required>
+              <option value="">Seleccionar pais</option>
+              <option value="Argentina">Argentina</option>
+              <option value="Uruguay">Uruguay</option>
+              <option value="Chile">Chile</option>
+              <option value="Brasil">Brasil</option>
+              <option value="Paraguay">Paraguay</option>
+              <option value="Bolivia">Bolivia</option>
+              <option value="Mexico">Mexico</option>
+              <option value="Colombia">Colombia</option>
+              <option value="Peru">Peru</option>
+              <option value="Espana">Espana</option>
+              <option value="Estados Unidos">Estados Unidos</option>
+            </select>
 
             <p class="form-error" id="formError" role="alert"></p>
 
-            <button class="primary-button" type="submit">Iniciar sesion</button>
+            <button class="primary-button" type="submit">Guardar usuario</button>
           </form>
-
-          <div class="test-access" aria-label="Credenciales de prueba">
-            <span>Usuario: demo@cowmarket.test</span>
-            <span>Clave: demo1234</span>
-          </div>
         </div>
 
         <div class="dashboard is-hidden" id="dashboardView">
@@ -113,12 +124,11 @@
             </svg>
           </div>
           <div class="card-heading">
-            <p>Sesion activa</p>
-            <h2>Tu pagina ya responde</h2>
+            <p>Usuario guardado</p>
+            <h2 id="savedUserTitle">Registro creado</h2>
           </div>
           <p class="dashboard-copy">
-            Si ves esta pantalla, el frontend llamo al backend. Cuando conectes
-            D1, cada login quedara guardado en la base de datos.
+            El frontend llamo al backend y el backend guardo el usuario en D1.
           </p>
           <div class="status-grid">
             <div>
@@ -130,12 +140,13 @@
               <strong id="backendStatus">OK</strong>
             </div>
             <div>
-              <span>Logins guardados</span>
-              <strong id="loginCount">...</strong>
+              <span>Usuarios guardados</span>
+              <strong id="userCount">...</strong>
             </div>
           </div>
-          <button class="secondary-button" id="logoutButton" type="button">
-            Cerrar sesion
+          <div class="recent-users" id="recentUsers" aria-label="Ultimos usuarios"></div>
+          <button class="secondary-button" id="newUserButton" type="button">
+            Cargar otro usuario
           </button>
         </div>
       </section>

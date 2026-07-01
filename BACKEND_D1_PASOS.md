@@ -1,39 +1,41 @@
 # Backend y base de datos en Cloudflare
 
-Esta demo ahora tiene tres partes:
+Esta demo tiene tres partes:
 
 - Frontend: `index.html`, `styles.css`, `app.js`
-- Backend: `functions/api/login.js` y `functions/api/stats.js`
+- Backend: `functions/api/users.js`
 - Base de datos: Cloudflare D1, conectada con el binding `DB`
 
 ## Que hace
 
-Cuando el usuario inicia sesion, el navegador llama a:
+Cuando se crea un usuario, el navegador llama a:
 
 ```txt
-POST /api/login
+POST /api/users
 ```
 
-El backend valida:
+El backend valida y guarda:
 
 ```txt
-Usuario: demo@cowmarket.test
-Clave: demo1234
+email
+fullName
+phone
+country
 ```
 
-Si existe una base D1 conectada como `DB`, guarda el intento en la tabla:
+Si existe una base D1 conectada como `DB`, guarda el usuario en la tabla:
 
 ```txt
-login_events
+users
 ```
 
 El panel llama a:
 
 ```txt
-GET /api/stats
+GET /api/users
 ```
 
-y muestra cuantos logins correctos quedaron guardados.
+y muestra cuantos usuarios quedaron guardados y los ultimos registros.
 
 ## Pasos en Cloudflare
 

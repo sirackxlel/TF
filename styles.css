@@ -31,7 +31,8 @@ body {
 }
 
 button,
-input {
+input,
+select {
   font: inherit;
 }
 
@@ -165,7 +166,8 @@ label {
   font-weight: 700;
 }
 
-input {
+input,
+select {
   width: 100%;
   min-height: 52px;
   border: 1px solid var(--border);
@@ -177,7 +179,16 @@ input {
   transition: border-color 160ms ease, box-shadow 160ms ease, background 160ms ease;
 }
 
-input:focus {
+select {
+  appearance: none;
+  background:
+    linear-gradient(45deg, transparent 50%, #4b5d58 50%) calc(100% - 20px) 22px / 7px 7px no-repeat,
+    linear-gradient(135deg, #4b5d58 50%, transparent 50%) calc(100% - 15px) 22px / 7px 7px no-repeat,
+    rgba(255, 255, 255, 0.82);
+}
+
+input:focus,
+select:focus {
   border-color: var(--accent);
   background: var(--surface-strong);
   box-shadow: 0 0 0 4px rgba(25, 197, 154, 0.16);
@@ -319,6 +330,37 @@ input:focus {
   display: block;
   margin-top: 10px;
   color: var(--text);
+}
+
+.recent-users {
+  display: grid;
+  gap: 10px;
+  margin-top: 18px;
+  text-align: left;
+}
+
+.recent-users div {
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #f6fbfa;
+}
+
+.recent-users strong,
+.recent-users span {
+  display: block;
+}
+
+.recent-users strong {
+  color: var(--text);
+  font-size: 14px;
+}
+
+.recent-users span {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.35;
 }
 
 .is-hidden {
