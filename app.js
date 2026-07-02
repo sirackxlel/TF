@@ -1,5 +1,4 @@
 const LAST_USER_KEY = "cowmarket-last-user";
-const CALENDAR_NOTES_KEY = "cowmarket-calendar-notes";
 
 const loginView = document.querySelector("#loginView");
 const formView = document.querySelector("#formView");
@@ -42,6 +41,8 @@ const monthNames = [
 
 let visibleMonth = new Date();
 let selectedDate = toDateKey(new Date());
+let currentUser = null;
+let calendarNotes = {};
 
 function setSavedView(isSaved) {
   document.body.classList.toggle("is-dashboard", isSaved);
@@ -50,6 +51,8 @@ function setSavedView(isSaved) {
   dashboardView.classList.toggle("is-hidden", !isSaved);
 
   if (isSaved) {
+    calendarNotes = {};
+    loadNotes();
     renderCalendar();
   }
 }
@@ -80,15 +83,34 @@ function showLoginError(message) {
 }
 
 function getStoredNotes() {
-  try {
-    return JSON.parse(localStorage.getItem(CALENDAR_NOTES_KEY)) || {};
-  } catch (error) {
-    return {};
-  }
+  return calendarNotes;
 }
 
 function saveStoredNotes(notes) {
-  localStorage.setItem(CALENDAR_NOTES_KEY, JSON.stringify(notes));
+  calendarNotes = notes;
+}
+
+async function loadNotes() {
+  if (!currentUser?.email) {
+    calendarNotes = {};
+    renderCalendar();
+    return;
+  }
+
+  try {
+    const response = await fetch(`/api/notes?email=${encodeURIComponent(currentUser.email)}`);
+    const data = await response.json();
+
+    if (!response.ok || !data.ok) {
+      throw new Error(data.message || "No se pudieron cargar las notas.");
+    }
+
+    calendarNotes = data.notes || {};
+    renderCalendar();
+  } catch (error) {
+    calendarNotes = {};
+    renderCalendar();
+  }
 }
 
 function getDateNotes(notes, dateKey) {
@@ -183,6 +205,7 @@ function renderNotesList(dayNotes) {
     text.textContent = note.text;
     button.type = "button";
     button.className = "note-delete";
+    button.dataset.noteId = String(note.id || "");
     button.dataset.noteIndex = String(index);
     button.textContent = "Borrar";
 
@@ -272,6 +295,7 @@ userForm.addEventListener("submit", async (event) => {
     }
 
     localStorage.setItem(LAST_USER_KEY, JSON.stringify(data.user));
+    currentUser = data.user;
     setSavedView(true);
   } catch (error) {
     showError("No se pudo conectar con el backend. Revisa el deploy de Cloudflare Pages.");
@@ -307,6 +331,7 @@ loginForm.addEventListener("submit", async (event) => {
     }
 
     localStorage.setItem(LAST_USER_KEY, JSON.stringify(data.user));
+    currentUser = data.user;
     setSavedView(true);
   } catch (error) {
     showLoginError("No se pudo conectar con el backend.");
@@ -324,6 +349,8 @@ showLoginButton.addEventListener("click", () => {
 
 newUserButton.addEventListener("click", () => {
   localStorage.removeItem(LAST_USER_KEY);
+  currentUser = null;
+  calendarNotes = {};
   loginForm.reset();
   userForm.reset();
   setAuthView("login");
@@ -357,7 +384,7 @@ noteForm.addEventListener("change", (event) => {
   }
 });
 
-noteForm.addEventListener("submit", (event) => {
+noteForm.addEventListener("submit", async (event) => {
   event.preventDefault();
 
   const notes = getStoredNotes();
@@ -369,13 +396,40 @@ noteForm.addEventListener("submit", (event) => {
     return;
   }
 
-  notes[selectedDate] = [...getDateNotes(notes, selectedDate), { text, color }];
-  saveStoredNotes(notes);
-  renderCalendar();
-  noteText.focus();
+  if (!currentUser?.email) {
+    setAuthView("login");
+    return;
+  }
+
+  try {
+    const response = await fetch("/api/notes", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        email: currentUser.email,
+        date: selectedDate,
+        text,
+        color,
+      }),
+    });
+    const data = await response.json();
+
+    if (!response.ok || !data.ok) {
+      throw new Error(data.message || "No se pudo guardar la nota.");
+    }
+
+    notes[selectedDate] = [...getDateNotes(notes, selectedDate), data.note];
+    saveStoredNotes(notes);
+    renderCalendar();
+    noteText.focus();
+  } catch (error) {
+    selectedDateLabel.textContent = "No se pudo guardar la nota.";
+  }
 });
 
-notesList.addEventListener("click", (event) => {
+notesList.addEventListener("click", async (event) => {
   const deleteButton = event.target.closest(".note-delete");
 
   if (!deleteButton) {
@@ -383,8 +437,34 @@ notesList.addEventListener("click", (event) => {
   }
 
   const notes = getStoredNotes();
+  const noteId = Number(deleteButton.dataset.noteId);
   const noteIndex = Number(deleteButton.dataset.noteIndex);
   const dayNotes = getDateNotes(notes, selectedDate);
+
+  if (!currentUser?.email || !Number.isInteger(noteId)) {
+    return;
+  }
+
+  try {
+    const response = await fetch("/api/notes", {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        email: currentUser.email,
+        id: noteId,
+      }),
+    });
+    const data = await response.json();
+
+    if (!response.ok || !data.ok) {
+      throw new Error(data.message || "No se pudo borrar la nota.");
+    }
+  } catch (error) {
+    selectedDateLabel.textContent = "No se pudo borrar la nota.";
+    return;
+  }
 
   dayNotes.splice(noteIndex, 1);
 
@@ -402,10 +482,11 @@ const lastUser = localStorage.getItem(LAST_USER_KEY);
 
 if (lastUser) {
   try {
-    JSON.parse(lastUser);
+    currentUser = JSON.parse(lastUser);
     setSavedView(true);
   } catch (error) {
     localStorage.removeItem(LAST_USER_KEY);
+    currentUser = null;
     setSavedView(false);
   }
 } else {
