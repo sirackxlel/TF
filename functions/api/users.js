@@ -47,8 +47,14 @@ async function getUserStats(db) {
   };
 }
 
+function getDatabase(env) {
+  return env.DB || env.tf_demo;
+}
+
 export async function onRequestGet(context) {
-  if (!context.env.DB) {
+  const db = getDatabase(context.env);
+
+  if (!db) {
     return json({
       ok: true,
       databaseConnected: false,
@@ -57,8 +63,8 @@ export async function onRequestGet(context) {
     });
   }
 
-  await ensureSchema(context.env.DB);
-  const stats = await getUserStats(context.env.DB);
+  await ensureSchema(db);
+  const stats = await getUserStats(db);
 
   return json({
     ok: true,
@@ -68,12 +74,14 @@ export async function onRequestGet(context) {
 }
 
 export async function onRequestPost(context) {
-  if (!context.env.DB) {
+  const db = getDatabase(context.env);
+
+  if (!db) {
     return json(
       {
         ok: false,
         databaseConnected: false,
-        message: "Falta conectar la base D1 con el binding DB.",
+        message: "Falta conectar la base D1 con el binding DB o tf_demo.",
       },
       503
     );
@@ -104,9 +112,9 @@ export async function onRequestPost(context) {
     return json({ ok: false, message: "El email no parece valido." }, 400);
   }
 
-  await ensureSchema(context.env.DB);
+  await ensureSchema(db);
 
-  const existing = await context.env.DB
+  const existing = await db
     .prepare("SELECT id FROM users WHERE email = ?")
     .bind(email)
     .first();
@@ -115,7 +123,7 @@ export async function onRequestPost(context) {
     return json({ ok: false, message: "Ese email ya esta registrado." }, 409);
   }
 
-  await context.env.DB
+  await db
     .prepare(
       `INSERT INTO users (email, full_name, phone, country, created_at)
        VALUES (?, ?, ?, ?, ?)`
