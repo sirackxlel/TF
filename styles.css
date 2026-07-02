@@ -500,19 +500,16 @@ textarea:focus {
 }
 
 .calendar-day.note-yellow,
-.note-form.note-yellow,
 .color-choice.yellow span {
   background: #fff3b0;
 }
 
 .calendar-day.note-red,
-.note-form.note-red,
 .color-choice.red span {
   background: #ffd1d1;
 }
 
 .calendar-day.note-green,
-.note-form.note-green,
 .color-choice.green span {
   background: #c9f4d2;
 }
@@ -535,6 +532,18 @@ textarea:focus {
   border: 1px solid var(--border);
   border-radius: 8px;
   background: #f6fbfa;
+}
+
+.note-form.note-green {
+  background: #e9f8ed;
+}
+
+.note-form.note-yellow {
+  background: #fff8cc;
+}
+
+.note-form.note-red {
+  background: #ffe2e2;
 }
 
 .note-colors {
@@ -581,8 +590,187 @@ textarea:focus {
   font-weight: 800;
 }
 
+.notes-list {
+  display: grid;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.notes-empty {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.note-item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: start;
+  padding: 10px;
+  border: 1px solid rgba(12, 27, 24, 0.12);
+  border-radius: 8px;
+}
+
+.note-item.note-green {
+  background: #c9f4d2;
+}
+
+.note-item.note-yellow {
+  background: #fff3b0;
+}
+
+.note-item.note-red {
+  background: #ffd1d1;
+}
+
+.note-item p {
+  margin: 0;
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.note-delete {
+  min-height: 30px;
+  border: 1px solid rgba(12, 27, 24, 0.16);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.58);
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.note-delete:hover {
+  background: rgba(255, 255, 255, 0.88);
+}
+
 .is-hidden {
   display: none;
+}
+
+body.is-dashboard {
+  overflow-x: hidden;
+}
+
+.is-dashboard .page-shell {
+  display: block;
+  width: 100%;
+  min-height: 100vh;
+  padding: 0;
+}
+
+.is-dashboard .intro {
+  position: fixed;
+  top: 18px;
+  left: 18px;
+  z-index: 10;
+  max-width: none;
+}
+
+.is-dashboard .brand {
+  gap: 0;
+}
+
+.is-dashboard .brand-name,
+.is-dashboard .intro-copy {
+  display: none;
+}
+
+.is-dashboard .brand-mark {
+  width: 44px;
+  height: 44px;
+  background: rgba(8, 16, 15, 0.72);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.28);
+}
+
+.is-dashboard .login-card {
+  min-height: 100vh;
+  padding: 78px clamp(16px, 3vw, 34px) 24px;
+  border: 0;
+  border-radius: 0;
+  background: rgba(246, 250, 248, 0.96);
+  box-shadow: none;
+}
+
+.is-dashboard .dashboard {
+  display: grid;
+  min-height: calc(100vh - 102px);
+  text-align: left;
+}
+
+.is-dashboard .calendar-panel {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(300px, 380px);
+  grid-template-areas:
+    "header note"
+    "weekdays note"
+    "grid note";
+  gap: 14px 20px;
+  align-items: start;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.is-dashboard .calendar-header {
+  grid-area: header;
+  grid-template-columns: 48px 1fr 48px;
+}
+
+.is-dashboard .calendar-header h3 {
+  font-size: clamp(26px, 4vw, 44px);
+}
+
+.is-dashboard .calendar-nav {
+  width: 48px;
+  height: 48px;
+  font-size: 24px;
+}
+
+.is-dashboard .calendar-weekdays {
+  grid-area: weekdays;
+}
+
+.is-dashboard .calendar-weekdays span {
+  font-size: 13px;
+}
+
+.is-dashboard .calendar-grid {
+  grid-area: grid;
+  gap: 10px;
+}
+
+.is-dashboard .calendar-day {
+  min-height: clamp(70px, 11vh, 124px);
+  aspect-ratio: auto;
+  font-size: clamp(16px, 2vw, 24px);
+}
+
+.is-dashboard .note-form {
+  position: sticky;
+  top: 78px;
+  grid-area: note;
+  margin: 0;
+}
+
+.is-dashboard .note-form textarea {
+  min-height: 150px;
+}
+
+.is-dashboard .logout-button {
+  position: fixed;
+  top: 18px;
+  right: 18px;
+  z-index: 10;
+  width: auto;
+  min-height: 44px;
+  margin: 0;
+  padding: 0 18px;
 }
 
 @media (max-width: 880px) {
@@ -598,6 +786,24 @@ textarea:focus {
 
   .deploy-list {
     grid-template-columns: 1fr;
+  }
+
+  .is-dashboard .calendar-panel {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "header"
+      "weekdays"
+      "grid"
+      "note";
+  }
+
+  .is-dashboard .note-form {
+    position: static;
+  }
+
+  .is-dashboard .calendar-day {
+    min-height: clamp(48px, 12vw, 74px);
+    font-size: 15px;
   }
 }
 

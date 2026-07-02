@@ -16,16 +16,13 @@ const phoneInput = document.querySelector("#phone");
 const countryInput = document.querySelector("#country");
 const formError = document.querySelector("#formError");
 const newUserButton = document.querySelector("#newUserButton");
-const backendStatus = document.querySelector("#backendStatus");
-const userCount = document.querySelector("#userCount");
-const savedUserTitle = document.querySelector("#savedUserTitle");
-const recentUsers = document.querySelector("#recentUsers");
 const calendarTitle = document.querySelector("#calendarTitle");
 const calendarGrid = document.querySelector("#calendarGrid");
 const previousMonthButton = document.querySelector("#previousMonthButton");
 const nextMonthButton = document.querySelector("#nextMonthButton");
 const noteForm = document.querySelector("#noteForm");
 const noteText = document.querySelector("#noteText");
+const notesList = document.querySelector("#notesList");
 const selectedDateLabel = document.querySelector("#selectedDateLabel");
 
 const monthNames = [
@@ -47,6 +44,7 @@ let visibleMonth = new Date();
 let selectedDate = toDateKey(new Date());
 
 function setSavedView(isSaved) {
+  document.body.classList.toggle("is-dashboard", isSaved);
   loginView.classList.toggle("is-hidden", isSaved);
   formView.classList.add("is-hidden");
   dashboardView.classList.toggle("is-hidden", !isSaved);
@@ -59,6 +57,7 @@ function setSavedView(isSaved) {
 function setAuthView(view) {
   const isRegister = view === "register";
 
+  document.body.classList.remove("is-dashboard");
   loginView.classList.toggle("is-hidden", isRegister);
   formView.classList.toggle("is-hidden", !isRegister);
   dashboardView.classList.add("is-hidden");
@@ -80,45 +79,6 @@ function showLoginError(message) {
   loginError.textContent = message;
 }
 
-async function loadStats() {
-  backendStatus.textContent = "Conectando";
-  userCount.textContent = "...";
-  recentUsers.textContent = "";
-
-  try {
-    const response = await fetch("/api/users");
-    const data = await response.json();
-
-    backendStatus.textContent = data.databaseConnected ? "OK + DB" : "Sin DB";
-    userCount.textContent = data.databaseConnected ? String(data.totalUsers) : "Sin D1";
-
-    if (data.users?.length) {
-      recentUsers.innerHTML = data.users
-        .map(
-          (user) => `
-            <div>
-              <strong>${escapeHtml(user.fullName)}</strong>
-              <span>${escapeHtml(user.email)} · ${escapeHtml(user.country)}</span>
-            </div>
-          `
-        )
-        .join("");
-    }
-  } catch (error) {
-    backendStatus.textContent = "Sin API";
-    userCount.textContent = "-";
-  }
-}
-
-function escapeHtml(value) {
-  return String(value)
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
-}
-
 function getStoredNotes() {
   try {
     return JSON.parse(localStorage.getItem(CALENDAR_NOTES_KEY)) || {};
@@ -129,6 +89,42 @@ function getStoredNotes() {
 
 function saveStoredNotes(notes) {
   localStorage.setItem(CALENDAR_NOTES_KEY, JSON.stringify(notes));
+}
+
+function getDateNotes(notes, dateKey) {
+  const saved = notes[dateKey];
+
+  if (!saved) {
+    return [];
+  }
+
+  if (Array.isArray(saved)) {
+    return saved.filter((note) => note?.text);
+  }
+
+  if (saved.text) {
+    return [saved];
+  }
+
+  return [];
+}
+
+function getDateColor(dayNotes) {
+  const colors = dayNotes.map((note) => note.color);
+
+  if (colors.includes("red")) {
+    return "red";
+  }
+
+  if (colors.includes("yellow")) {
+    return "yellow";
+  }
+
+  if (colors.includes("green")) {
+    return "green";
+  }
+
+  return "green";
 }
 
 function toDateKey(date) {
@@ -159,11 +155,40 @@ function selectNoteColor(color) {
 
 function loadSelectedNote() {
   const notes = getStoredNotes();
-  const note = notes[selectedDate] || { text: "", color: "yellow" };
+  const dayNotes = getDateNotes(notes, selectedDate);
 
-  noteText.value = note.text;
+  noteText.value = "";
   selectedDateLabel.textContent = formatDateLabel(selectedDate);
-  selectNoteColor(note.color || "yellow");
+  selectNoteColor("green");
+  renderNotesList(dayNotes);
+}
+
+function renderNotesList(dayNotes) {
+  notesList.textContent = "";
+
+  if (!dayNotes.length) {
+    const emptyNote = document.createElement("p");
+    emptyNote.className = "notes-empty";
+    emptyNote.textContent = "Sin notas todavia.";
+    notesList.append(emptyNote);
+    return;
+  }
+
+  dayNotes.forEach((note, index) => {
+    const item = document.createElement("div");
+    const text = document.createElement("p");
+    const button = document.createElement("button");
+
+    item.className = `note-item note-${note.color || "green"}`;
+    text.textContent = note.text;
+    button.type = "button";
+    button.className = "note-delete";
+    button.dataset.noteIndex = String(index);
+    button.textContent = "Borrar";
+
+    item.append(text, button);
+    notesList.append(item);
+  });
 }
 
 function renderCalendar() {
@@ -190,7 +215,7 @@ function renderCalendar() {
   for (let day = 1; day <= daysInMonth; day += 1) {
     const date = new Date(year, month, day);
     const dateKey = toDateKey(date);
-    const note = notes[dateKey];
+    const dayNotes = getDateNotes(notes, dateKey);
     const button = document.createElement("button");
 
     button.className = "calendar-day";
@@ -202,9 +227,11 @@ function renderCalendar() {
       button.classList.add("is-selected");
     }
 
-    if (note?.text) {
-      button.classList.add("has-note", `note-${note.color || "yellow"}`);
-      button.title = note.text;
+    if (dayNotes.length) {
+      const dayColor = getDateColor(dayNotes);
+
+      button.classList.add("has-note", `note-${dayColor}`);
+      button.title = `${dayNotes.length} nota${dayNotes.length === 1 ? "" : "s"}`;
     }
 
     calendarGrid.append(button);
@@ -245,7 +272,6 @@ userForm.addEventListener("submit", async (event) => {
     }
 
     localStorage.setItem(LAST_USER_KEY, JSON.stringify(data.user));
-    savedUserTitle.textContent = data.user.fullName;
     setSavedView(true);
   } catch (error) {
     showError("No se pudo conectar con el backend. Revisa el deploy de Cloudflare Pages.");
@@ -281,7 +307,6 @@ loginForm.addEventListener("submit", async (event) => {
     }
 
     localStorage.setItem(LAST_USER_KEY, JSON.stringify(data.user));
-    savedUserTitle.textContent = data.user.fullName;
     setSavedView(true);
   } catch (error) {
     showLoginError("No se pudo conectar con el backend.");
@@ -337,12 +362,36 @@ noteForm.addEventListener("submit", (event) => {
 
   const notes = getStoredNotes();
   const text = noteText.value.trim();
-  const color = noteForm.querySelector('input[name="noteColor"]:checked')?.value || "yellow";
+  const color = noteForm.querySelector('input[name="noteColor"]:checked')?.value || "green";
 
   if (!text) {
-    delete notes[selectedDate];
+    noteText.focus();
+    return;
+  }
+
+  notes[selectedDate] = [...getDateNotes(notes, selectedDate), { text, color }];
+  saveStoredNotes(notes);
+  renderCalendar();
+  noteText.focus();
+});
+
+notesList.addEventListener("click", (event) => {
+  const deleteButton = event.target.closest(".note-delete");
+
+  if (!deleteButton) {
+    return;
+  }
+
+  const notes = getStoredNotes();
+  const noteIndex = Number(deleteButton.dataset.noteIndex);
+  const dayNotes = getDateNotes(notes, selectedDate);
+
+  dayNotes.splice(noteIndex, 1);
+
+  if (dayNotes.length) {
+    notes[selectedDate] = dayNotes;
   } else {
-    notes[selectedDate] = { text, color };
+    delete notes[selectedDate];
   }
 
   saveStoredNotes(notes);
@@ -353,8 +402,7 @@ const lastUser = localStorage.getItem(LAST_USER_KEY);
 
 if (lastUser) {
   try {
-    const user = JSON.parse(lastUser);
-    savedUserTitle.textContent = user.fullName || "Registro creado";
+    JSON.parse(lastUser);
     setSavedView(true);
   } catch (error) {
     localStorage.removeItem(LAST_USER_KEY);

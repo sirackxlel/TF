@@ -22,7 +22,7 @@
       <section class="intro" aria-label="Calendario Guerrero">
         <a class="brand" href="/" aria-label="Calendario Guerrero inicio">
           <span class="brand-mark">C</span>
-          <span>Calendario Guerrero</span>
+          <span class="brand-name">Calendario Guerrero</span>
         </a>
 
         <div class="intro-copy">
@@ -122,19 +122,6 @@
         </div>
 
         <div class="dashboard is-hidden" id="dashboardView">
-          <div class="success-icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24">
-              <path d="M20 6 9 17l-5-5" />
-            </svg>
-          </div>
-          <div class="card-heading">
-            <p>Calendario Guerrero</p>
-            <h2 id="savedUserTitle">Bienvenido</h2>
-          </div>
-          <p class="dashboard-copy">
-            Tus notas quedan organizadas por dia y color.
-          </p>
-
           <section class="calendar-panel" aria-label="Calendario de notas">
             <div class="calendar-header">
               <button class="calendar-nav" id="previousMonthButton" type="button" aria-label="Mes anterior">
@@ -167,26 +154,27 @@
               ></textarea>
 
               <div class="note-colors" role="radiogroup" aria-label="Color de la nota">
+                <label class="color-choice green">
+                  <input type="radio" name="noteColor" value="green" checked />
+                  <span>Verde</span>
+                </label>
                 <label class="color-choice yellow">
-                  <input type="radio" name="noteColor" value="yellow" checked />
+                  <input type="radio" name="noteColor" value="yellow" />
                   <span>Amarillo</span>
                 </label>
                 <label class="color-choice red">
                   <input type="radio" name="noteColor" value="red" />
                   <span>Rojo</span>
                 </label>
-                <label class="color-choice green">
-                  <input type="radio" name="noteColor" value="green" />
-                  <span>Verde</span>
-                </label>
               </div>
 
               <p class="selected-date" id="selectedDateLabel"></p>
-              <button class="primary-button" type="submit">Guardar nota</button>
+              <button class="primary-button" type="submit">Agregar nota</button>
+              <div class="notes-list" id="notesList" aria-label="Notas del dia"></div>
             </form>
           </section>
 
-          <button class="secondary-button" id="newUserButton" type="button">
+          <button class="secondary-button logout-button" id="newUserButton" type="button">
             Cerrar sesion
           </button>
         </div>
