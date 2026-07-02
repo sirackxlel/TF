@@ -47,6 +47,16 @@ async function getUserStats(db) {
   };
 }
 
+function formatUser(row) {
+  return {
+    email: row.email,
+    fullName: row.fullName,
+    phone: row.phone,
+    country: row.country,
+    createdAt: row.createdAt,
+  };
+}
+
 function getDatabase(env) {
   return env.DB || env.tf_demo;
 }
@@ -95,17 +105,11 @@ export async function onRequestPost(context) {
     return json({ ok: false, message: "JSON invalido." }, 400);
   }
 
+  const action = clean(payload.action) || "register";
   const email = clean(payload.email).toLowerCase();
-  const fullName = clean(payload.fullName);
-  const phone = clean(payload.phone);
-  const country = clean(payload.country);
-  const createdAt = new Date().toISOString();
 
-  if (!email || !fullName || !phone || !country) {
-    return json(
-      { ok: false, message: "Completa email, nombre completo, numero y pais." },
-      400
-    );
+  if (!email) {
+    return json({ ok: false, message: "Completa el email." }, 400);
   }
 
   if (!isValidEmail(email)) {
@@ -113,6 +117,39 @@ export async function onRequestPost(context) {
   }
 
   await ensureSchema(db);
+
+  if (action === "login") {
+    const user = await db
+      .prepare(
+        `SELECT email, full_name AS fullName, phone, country, created_at AS createdAt
+         FROM users
+         WHERE email = ?`
+      )
+      .bind(email)
+      .first();
+
+    if (!user) {
+      return json({ ok: false, message: "No existe un usuario con ese email." }, 404);
+    }
+
+    return json({
+      ok: true,
+      databaseConnected: true,
+      user: formatUser(user),
+    });
+  }
+
+  const fullName = clean(payload.fullName);
+  const phone = clean(payload.phone);
+  const country = clean(payload.country);
+  const createdAt = new Date().toISOString();
+
+  if (!fullName || !phone || !country) {
+    return json(
+      { ok: false, message: "Completa email, nombre completo, numero y pais." },
+      400
+    );
+  }
 
   const existing = await db
     .prepare("SELECT id FROM users WHERE email = ?")

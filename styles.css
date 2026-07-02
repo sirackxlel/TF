@@ -32,7 +32,8 @@ body {
 
 button,
 input,
-select {
+select,
+textarea {
   font: inherit;
 }
 
@@ -73,7 +74,7 @@ select {
 }
 
 .intro-copy {
-  margin-top: clamp(54px, 9vw, 110px);
+  margin-top: clamp(70px, 12vw, 150px);
 }
 
 .intro h1 {
@@ -167,7 +168,8 @@ label {
 }
 
 input,
-select {
+select,
+textarea {
   width: 100%;
   min-height: 52px;
   border: 1px solid var(--border);
@@ -179,7 +181,14 @@ select {
   transition: border-color 160ms ease, box-shadow 160ms ease, background 160ms ease;
 }
 
-input::placeholder {
+textarea {
+  min-height: 86px;
+  padding: 12px 14px;
+  resize: vertical;
+}
+
+input::placeholder,
+textarea::placeholder {
   color: #47534f;
   opacity: 1;
 }
@@ -207,7 +216,8 @@ select {
 }
 
 input:focus,
-select:focus {
+select:focus,
+textarea:focus {
   border-color: var(--accent);
   background: var(--surface-strong);
   box-shadow: 0 0 0 4px rgba(25, 197, 154, 0.16);
@@ -289,6 +299,10 @@ select:focus {
   border: 1px solid var(--border);
   background: #f4faf8;
   color: var(--text);
+}
+
+.compact-button {
+  margin-top: 14px;
 }
 
 .test-access {
@@ -382,6 +396,191 @@ select:focus {
   line-height: 1.35;
 }
 
+.calendar-panel {
+  margin-top: 20px;
+  padding-top: 18px;
+  border-top: 1px solid var(--border);
+  text-align: left;
+}
+
+.calendar-header {
+  display: grid;
+  grid-template-columns: 38px 1fr 38px;
+  gap: 10px;
+  align-items: center;
+}
+
+.calendar-header h3 {
+  margin: 0;
+  color: var(--text);
+  font-size: 17px;
+  line-height: 1.2;
+  text-align: center;
+}
+
+.calendar-nav {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #f6fbfa;
+  color: var(--text);
+  font-size: 18px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.calendar-nav:hover {
+  background: #ecf5f2;
+}
+
+.calendar-weekdays,
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.calendar-weekdays {
+  margin-top: 14px;
+}
+
+.calendar-weekdays span {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.calendar-grid {
+  margin-top: 8px;
+}
+
+.calendar-day {
+  position: relative;
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #ffffff;
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.calendar-day:hover {
+  border-color: rgba(25, 197, 154, 0.5);
+}
+
+.calendar-day.is-empty {
+  border-color: transparent;
+  background: transparent;
+  cursor: default;
+}
+
+.calendar-day.is-selected {
+  border-color: var(--accent-strong);
+  box-shadow: 0 0 0 3px rgba(25, 197, 154, 0.18);
+}
+
+.calendar-day.has-note::after {
+  position: absolute;
+  right: 5px;
+  bottom: 5px;
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  content: "";
+}
+
+.calendar-day.note-yellow,
+.note-form.note-yellow,
+.color-choice.yellow span {
+  background: #fff3b0;
+}
+
+.calendar-day.note-red,
+.note-form.note-red,
+.color-choice.red span {
+  background: #ffd1d1;
+}
+
+.calendar-day.note-green,
+.note-form.note-green,
+.color-choice.green span {
+  background: #c9f4d2;
+}
+
+.calendar-day.note-yellow::after {
+  background: #c99c00;
+}
+
+.calendar-day.note-red::after {
+  background: #d84a4a;
+}
+
+.calendar-day.note-green::after {
+  background: #32a852;
+}
+
+.note-form {
+  margin-top: 16px;
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #f6fbfa;
+}
+
+.note-colors {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.color-choice {
+  cursor: pointer;
+}
+
+.color-choice input {
+  position: absolute;
+  width: 1px;
+  min-height: 0;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.color-choice span {
+  display: grid;
+  place-items: center;
+  min-height: 36px;
+  border: 1px solid rgba(12, 27, 24, 0.12);
+  border-radius: 8px;
+  color: #0d1715;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.color-choice input:checked + span {
+  border-color: var(--accent-strong);
+  box-shadow: 0 0 0 3px rgba(25, 197, 154, 0.18);
+}
+
+.selected-date {
+  min-height: 18px;
+  margin: 10px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+
 .is-hidden {
   display: none;
 }
@@ -420,6 +619,10 @@ select:focus {
   }
 
   .status-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .note-colors {
     grid-template-columns: 1fr;
   }
 }
