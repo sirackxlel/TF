@@ -174,9 +174,28 @@ select {
   border-radius: 8px;
   padding: 0 14px;
   background: rgba(255, 255, 255, 0.82);
-  color: var(--text);
+  color: #000000;
   outline: none;
   transition: border-color 160ms ease, box-shadow 160ms ease, background 160ms ease;
+}
+
+input::placeholder {
+  color: #47534f;
+  opacity: 1;
+}
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+select:-webkit-autofill,
+select:-webkit-autofill:hover,
+select:-webkit-autofill:focus {
+  -webkit-text-fill-color: #000000;
+  box-shadow: 0 0 0 1000px rgba(255, 255, 255, 0.82) inset;
+}
+
+select option {
+  color: #000000;
 }
 
 select {
